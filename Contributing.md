@@ -12,8 +12,15 @@ This document provides guidelines to help you collaborate effectively on this pr
 git clone https://github.com/adityaKothari06/SE-Project
 cd SE-project
 ```
+## 2. Setup Frontend Locally (First Time Only)
 
-### 2. Create a New Branch
+```bash
+cd frontend
+npm install
+npm start
+```
+
+### 3. Create a New Branch
 
 🚫 Never work on main branch
 ```bash
@@ -25,12 +32,12 @@ Examples:
 - `feature/event-form`
 - `bugfix/reservation-error`
 
-### 3. Make Your Changes
+### 4. Make Your Changes
 - Follow project structure
 - Write clean and readable code
 - Keep changes focused (one feature per branch)
 
-### 4. Commit Your Changes
+### 5. Commit Your Changes
 ```bash
 git add .
 git commit -m "Add: short description of your changes"
@@ -44,7 +51,7 @@ git commit -m "Add: short description of your changes"
 - fix
 - done
 
-### 5. Push Your Branch 
+### 6. Push Your Branch 
 ```bash
 git push origin feature/your-feature-name```
 
