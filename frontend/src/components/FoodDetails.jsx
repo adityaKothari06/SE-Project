@@ -1,9 +1,10 @@
-import { useParams, useLocation, useNavigate } from "react-router";
+import { useParams, useLocation, useNavigate, Link } from "react-router";
 import { useState, useEffect } from "react";
+import { useAuth } from "../context/useAuth";
 
 const FoodDetails = () => {
   const { id } = useParams();
-
+  const { currentUser } = useAuth();
   const [isReserved, setIsReserved] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [canUnreserve, setCanUnreserve] = useState(false);
@@ -21,8 +22,9 @@ const FoodDetails = () => {
       category: "Cooked Food",
       quantity: 10,
       location: "Delhi",
-      image: "https://tse4.mm.bing.net/th/id/OIP.1O4yDXeGOG3jjdOivuw00gHaE8?pid=Api&h=220&P=0",
-      description: "Freshly cooked veg biryani from a wedding event."
+      image:
+        "https://tse4.mm.bing.net/th/id/OIP.1O4yDXeGOG3jjdOivuw00gHaE8?pid=Api&h=220&P=0",
+      description: "Freshly cooked veg biryani from a wedding event.",
     },
     {
       id: "2",
@@ -57,9 +59,14 @@ const FoodDetails = () => {
   }, [timeLeft, canUnreserve]);
 
   const handleReserve = () => {
-    setIsReserved(true);
-    setCanUnreserve(true);
-    setTimeLeft(10); // 1 minute window
+    if (currentUser) {
+      setIsReserved(true);
+      setCanUnreserve(true);
+      setTimeLeft(10); // 1 minute window
+    }else {
+      navigate("/Login")
+    }
+    
   };
 
   const handleUnreserve = () => {
@@ -87,12 +94,15 @@ const FoodDetails = () => {
         className="w-full h-fit object-cover rounded-lg mb-4"
       />
 
-      <p><strong>Donor:</strong> {food.donor}</p>
-      <p><strong>Location:</strong> {food.location}</p>
+      <p>
+        <strong>Donor:</strong> {food.donor}
+      </p>
+      <p>
+        <strong>Location:</strong> {food.location}
+      </p>
 
       {/* Buttons */}
       <div className="mt-6 flex gap-4 items-center">
-        
         {/* Reserve */}
         {!isReserved && (
           <button
@@ -124,10 +134,14 @@ const FoodDetails = () => {
         <button
           disabled={!isReserved}
           onClick={() =>
-            window.open(`https://www.google.com/maps/search/?api=1&query=${food.location}`)
+            window.open(
+              `https://www.google.com/maps/search/?api=1&query=${food.location}`,
+            )
           }
           className={`px-4 py-2 rounded text-white ${
-            isReserved ? "bg-blue-600 cursor-pointer" : "bg-gray-400 cursor-not-allowed"
+            isReserved
+              ? "bg-blue-600 cursor-pointer"
+              : "bg-gray-400 cursor-not-allowed"
           }`}
         >
           Get Directions
