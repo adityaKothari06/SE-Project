@@ -3,6 +3,8 @@ import { auth } from "../../firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { useEffect, useState, useTransition } from "react";
 import { useAuth } from "../context/useAuth";
+import { db } from "../../firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 const Login = () => {
   const { setCurrentUser } = useAuth();
@@ -48,7 +50,6 @@ const Login = () => {
   // this is to request otp
   const requestOtp = async (e) => {
     e.preventDefault();
-    setResendCountdown(60);
 
     startTransition(async () => {
       setError("");
@@ -58,9 +59,24 @@ const Login = () => {
       }
 
       try {
+        // formatting the phone number
+        const formattedPhone = phoneNumber.startsWith("+91")
+          ? phoneNumber
+          : `+91${phoneNumber}`;
+
+        // checking if the user exists
+        const userRef = doc(db, "users", formattedPhone);
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) {
+          setError("User not registered. Please register first.");
+          return;
+        }
+
+        setResendCountdown(60);
+
         const confirmationResult = await signInWithPhoneNumber(
           auth,
-          phoneNumber,
+          formattedPhone,
           recaptchaVerifier,
         );
 
@@ -94,8 +110,30 @@ const Login = () => {
       try {
         const result = await confirmationResult.confirm(otp);
 
-        // updating context
-        setCurrentUser(result.user);
+        const phone = result.user.phoneNumber;
+
+        const userRef = doc(db, "users", phone);
+        const userSnap = await getDoc(userRef);
+
+        console.log("Phone:", phone);
+        console.log("Firestore exists:", userSnap.exists());
+        console.log("Data:", userSnap.data());
+        let userData = {};
+        if (userSnap.exists()) {
+          userData = userSnap.data();
+        }
+
+        if (!userSnap.exists()) {
+          console.log("user not found in firebase");
+          return;
+        }
+        console.log(userSnap.data());
+
+        // storing combined user data in context
+        setCurrentUser({
+          ...result.user,
+          ...userData,
+        });
 
         navigate("/FoodList");
       } catch (error) {
@@ -135,7 +173,10 @@ const Login = () => {
               <input
                 type="tel"
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
+                onChange={(e) => {
+                  setPhoneNumber(e.target.value);
+                  setConfirmationResult(null);
+                }}
                 className="bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full px-3 py-2.5 placeholder-gray-400 shadow-sm"
                 placeholder="+91 7894561230"
                 required
@@ -176,7 +217,6 @@ const Login = () => {
         <div className="flex justify-center items-center">
           <button
             disabled={!phoneNumber || isPending || resendCountdown > 0}
-            onClick={requestOtp}
             className="w-1/2 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-md text-sm px-4 py-2.5 focus:outline-none shadow-sm cursor-pointer"
           >
             {resendCountdown > 0

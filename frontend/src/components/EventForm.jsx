@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import LocationInput from "./LocationInput";
 
 const EventForm = () => {
   const navigate = useNavigate();
+  const [locationData, setLocationData] = useState(null);
 
   const [formData, setFormData] = useState({
     institutionName: "",
@@ -42,10 +44,15 @@ const EventForm = () => {
     }
 
     const now = new Date();
-    const expiryTime = new Date(now.getTime() + formData.durationMinutes * 60 * 1000);
+    const expiryTime = new Date(
+      now.getTime() + formData.durationMinutes * 60 * 1000,
+    );
 
     const submissionData = {
       ...formData,
+      location: locationData?.address,
+      lat: locationData?.lat,
+      lng: locationData?.lng,
       submittedAt: now,
       expiryTime,
     };
@@ -78,7 +85,6 @@ const EventForm = () => {
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-
         <input
           type="text"
           name="institutionName"
@@ -89,13 +95,24 @@ const EventForm = () => {
           disabled={submitted}
         />
 
-        <textarea
+        {/* <textarea
           name="address"
           placeholder="Address"
           value={formData.address}
           onChange={handleChange}
           className="w-full p-2 border rounded"
           disabled={submitted}
+        /> */}
+
+        <LocationInput
+          onLocationSelect={(data) => {
+            setLocationData(data);
+
+            setFormData((prev) => ({
+              ...prev,
+              address: data.address,
+            }));
+          }}
         />
 
         <input
@@ -153,7 +170,9 @@ const EventForm = () => {
         <button
           type="submit"
           className={`w-full py-2 rounded text-white ${
-            submitted ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+            submitted
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
           }`}
           disabled={submitted}
         >
@@ -164,6 +183,7 @@ const EventForm = () => {
       {submitted && (
         <p className="text-green-600 text-center mt-4">
           ✅ Donation added successfully! Redirecting...
+          {console.log(formData)}
         </p>
       )}
     </div>
