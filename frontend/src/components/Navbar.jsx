@@ -57,8 +57,8 @@ const Navbar = () => {
               {currentUser && (
                 <>
                   <li>
-                    <span className="block py-2 px-2 text-gray-800">
-                      Hi, {currentUser.phoneNumber}
+                    <span className="block py-2 px-2 text-gray-800 hover:text-blue-700 cursor-pointer">
+                      <Link to="/Profile">Hi, {currentUser.firstName}</Link>
                     </span>
                   </li>
                   <li>
@@ -81,14 +81,14 @@ const Navbar = () => {
                 </Link>
               </li>
 
-              <li>
+              {/* <li>
                 <Link
                   to="/Profile"
                   className="block py-2 px-2 text-gray-800 hover:text-blue-700"
                 >
                   Profile
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
         </div>

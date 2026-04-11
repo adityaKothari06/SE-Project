@@ -8,6 +8,7 @@ import EventForm from "./components/EventForm";
 import HomePage from "./Pages/HomePage";
 import Terms from "./Pages/Terms";
 import Home from "./Pages/Home";
+import Profile from "./Pages/Profile";
 import { AuthProvider } from "./context/AuthProvider";
 import PrivateRoute from "./components/PrivateRoute";
 
@@ -19,7 +20,7 @@ const App = () => {
         <Navbar />
         <Routes>
           {/* <Route path='/' element={<HomePage/>}/> */}
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/Login" element={<LoginPage />} />
           <Route path="/terms-and-conditions" element={<Terms />} />
           <Route path="/Register" element={<RegistrationPage />} />
@@ -28,6 +29,7 @@ const App = () => {
           } />
           <Route path="/food/:id" element={<FoodDetails />} />
           <Route path="/AddDonation" element={<EventForm />} />
+          <Route path="/Profile" element={<PrivateRoute><Profile/></PrivateRoute>}></Route>
         </Routes>
       </div>
     </AuthProvider>

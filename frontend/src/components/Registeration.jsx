@@ -1,131 +1,106 @@
+import { useState } from "react";
+import { useNavigate } from "react-router";
+import { db } from "../../firebase";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
 const Registration = () => {
+  const navigate = useNavigate();
+
+  const [phone, setPhone] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [error, setError] = useState("");
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const formattedPhone = phone.startsWith("+91")
+        ? phone
+        : `+91${phone}`;
+
+      // 🔍 Check if already exists
+      const userRef = doc(db, "users", formattedPhone);
+      const userSnap = await getDoc(userRef);
+
+      if (userSnap.exists()) {
+        setError("User already exists. Please login.");
+        return;
+      }
+
+      // Save to Firestore
+      await setDoc(userRef, {
+        phone: formattedPhone,
+        firstName,
+        lastName,
+        createdAt: new Date(),
+      });
+
+      alert("Registered successfully ✅");
+
+      // Redirect to login
+      navigate("/login");
+
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong.");
+    }
+  };
+
   return (
-    <div className="h-screen pt-20 flex flex-col justify-center items-center bg-blue-50">
-      <form className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl text-center mb-5">Register</h2>
-      {/* Email */}
-      {/* <div className="relative z-0 w-full mb-5 group">
-        <input
-          type="tel"
-          name="floating_phn"
-          id="floating_phn"
-          className="block py-2.5 px-0 w-full text-sm text-gray-800 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer"
-          placeholder=" "
-          required
-        />
+    <div className="h-screen flex justify-center items-center bg-blue-50">
+      <form
+        onSubmit={handleRegister}
+        className="max-w-md w-full bg-white p-6 rounded-lg shadow-md"
+      >
+        <h2 className="text-2xl text-center mb-5">Register</h2>
 
-          
-
-        <label
-          htmlFor="floating_email"
-          className="absolute text-sm text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-leftpeer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-        >
-          Email address
-        </label>
-      </div> */}
-
-      <div className="relative z-0 w-full mb-5 group">
+        {/* Phone */}
+        <div className="mb-5">
           <input
             type="tel"
-            pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
-            name="floating_phone"
-            id="floating_phone"
-            className="block py-2.5 px-0 w-full text-sm text-gray-800 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer"
-            placeholder=" "
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="block w-full border-b-2 border-gray-300 py-2.5 outline-none focus:border-blue-500"
+            placeholder="Phone Number"
             required
           />
-          <label
-            htmlFor="floating_phone"
-            className="absolute text-sm text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-leftpeer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-          >
-            Phone number
-          </label>
         </div>
 
-      {/* Password */}
-      <div className="relative z-0 w-full mb-5 group">
-        <input
-          type="password"
-          name="floating_password"
-          id="floating_password"
-          className="block py-2.5 px-0 w-full text-sm text-gray-800 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer"
-          placeholder=" "
-          required
-        />
-        <label
-          htmlFor="floating_password"
-          className="absolute text-sm text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-leftpeer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-        >
-          Password
-        </label>
-      </div>
-
-      {/* Confirm Password */}
-      <div className="relative z-0 w-full mb-5 group text-left">
-        <input
-          type="password"
-          name="repeat_password"
-          id="floating_repeat_password"
-          className="block py-2.5 px-0 w-full text-sm text-gray-800 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer"
-          placeholder=" "
-          required
-        />
-        <label
-          htmlFor="floating_repeat_password"
-          className="absolute text-sm text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-leftpeer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-        >
-          Confirm password
-        </label>
-      </div>
-
-      {/* First and Last Name */}
-      <div className="grid md:grid-cols-2 md:gap-6">
-        <div className="relative z-0 w-full mb-5 group">
+        {/* First Name */}
+        <div className="mb-5">
           <input
             type="text"
-            name="floating_first_name"
-            id="floating_first_name"
-            className="block py-2.5 px-0 w-full text-sm text-gray-800 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer"
-            placeholder=" "
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            className="block w-full border-b-2 border-gray-300 py-2.5 outline-none focus:border-blue-500"
+            placeholder="First Name"
             required
           />
-          <label
-            htmlFor="floating_first_name"
-            className="absolute text-sm text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-leftpeer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-          >
-            First name
-          </label>
         </div>
 
-        <div className="relative z-0 w-full mb-5 group">
+        {/* Last Name */}
+        <div className="mb-5">
           <input
             type="text"
-            name="floating_last_name"
-            id="floating_last_name"
-            className="block py-2.5 px-0 w-full text-sm text-gray-800 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-500 peer"
-            placeholder=" "
-            required
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            className="block w-full border-b-2 border-gray-300 py-2.5 outline-none focus:border-blue-500"
+            placeholder="Last Name"
           />
-          <label
-            htmlFor="floating_last_name"
-            className="absolute text-sm text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-leftpeer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-          >
-            Last name
-          </label>
         </div>
-      </div>
 
-      
+        {/* Submit */}
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2.5 rounded-md hover:bg-blue-700"
+        >
+          Register
+        </button>
 
-      {/* Submit */}
-      <button
-        type="submit"
-        className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-md text-sm px-4 py-2.5 focus:outline-none shadow-sm"
-      >
-        Submit
-      </button>
-    </form>
+        {error && <p className="text-red-500 mt-3">{error}</p>}
+      </form>
     </div>
   );
 };
