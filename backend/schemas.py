@@ -35,17 +35,13 @@ class EventResponse(BaseModel):
 class ReservationCreate(BaseModel):
     quantity_requested: int
 
-class CollectionUpdate(BaseModel):
-    collection_percentage: float
-
 class ReservationResponse(BaseModel):
     id: int
     event_id: int
     recipient_firebase_uid: str
     quantity_requested: int
     reserved_at: datetime
-    collection_percentage: Optional[float]
-    status: str
+    is_collected: int
 
     class Config:
         from_attributes = True

@@ -36,7 +36,6 @@ class Reservation(Base):
     recipient_firebase_uid = Column(String(255), nullable=False)
     quantity_requested = Column(Integer, nullable=False)
     reserved_at = Column(DateTime, default=datetime.datetime.utcnow)
-    collection_percentage = Column(Float, nullable=True)
-    status = Column(Enum("active", "collected", "cancelled"), default="active")
+    is_collected = Column(Integer, default=0)  # 0 = not collected, 1 = collected
 
     event = relationship("Event", back_populates="reservations")
