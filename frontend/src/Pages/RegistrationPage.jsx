@@ -1,4 +1,4 @@
-import Registration from '../components/Registeration'
+import Registration from '../components/SignUp'
 
 const RegistrationPage = () => {
   return (

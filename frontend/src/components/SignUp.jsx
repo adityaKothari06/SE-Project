@@ -54,19 +54,9 @@ const Registration = () => {
         onSubmit={handleRegister}
         className="max-w-md w-full bg-white p-6 rounded-lg shadow-md"
       >
-        <h2 className="text-2xl text-center mb-5">Register</h2>
+        <h2 className="text-2xl text-center mb-5">Sign Up</h2>
 
-        {/* Phone */}
-        <div className="mb-5">
-          <input
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="block w-full border-b-2 border-gray-300 py-2.5 outline-none focus:border-blue-500"
-            placeholder="Phone Number"
-            required
-          />
-        </div>
+        
 
         {/* First Name */}
         <div className="mb-5">
@@ -91,12 +81,24 @@ const Registration = () => {
           />
         </div>
 
+        {/* Phone */}
+        <div className="mb-5">
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="block w-full border-b-2 border-gray-300 py-2.5 outline-none focus:border-blue-500"
+            placeholder="Phone Number"
+            required
+          />
+        </div>
+
         {/* Submit */}
         <button
           type="submit"
           className="w-full bg-blue-600 text-white py-2.5 rounded-md hover:bg-blue-700"
         >
-          Register
+          Sign Up
         </button>
 
         {error && <p className="text-red-500 mt-3">{error}</p>}

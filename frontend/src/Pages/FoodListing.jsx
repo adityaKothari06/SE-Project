@@ -10,20 +10,17 @@ const FoodListing = () => {
     const value = e.target.value;
     setLocationFilter(value);
 
-    // Resetting the ui if cleared
     if (value.trim() === "") {
       setSearchedCity("");
     }
   };
 
-  // handle Search click
   const handleSearchClick = () => {
     if (locationFilter.trim() !== "") {
       setSearchedCity(locationFilter.trim());
     }
   };
 
-  // enter to search
   const handleEnterKey = (e) => {
     if (e.key === "Enter") {
       handleSearchClick();
@@ -40,45 +37,69 @@ const FoodListing = () => {
   }, [location.state]);
 
   return (
-    <div className="mt-25 px-4 space-y-6">
-      {/* Search bar */}
-      <div className="flex items-center justify-center gap-2 w-full">
-        <input
-          type="text"
-          placeholder="Filter by location..."
-          value={locationFilter || ""}
-          onChange={handleLocationFilter}
-          onKeyDown={handleEnterKey}
-          className="flex-1 max-w-md p-2 border border-gray-300 rounded"
-        />
+    <div className="px-6 py-10 max-w-6xl mx-auto space-y-10">
 
-        <button
-          onClick={handleSearchClick}
-          disabled={!locationFilter || !locationFilter.trim()}
-          className={`px-4 py-2 rounded text-white whitespace-nowrap ${
-            locationFilter && locationFilter.trim()
-              ? "bg-blue-500 hover:bg-blue-600"
-              : "bg-gray-400 cursor-not-allowed"
-          }`}
-        >
-          Search
-        </button>
+      {/* Search */}
+      <div className="flex justify-center">
+        <div className="flex w-full max-w-2xl gap-2">
+          <input
+            type="text"
+            placeholder="Search by city..."
+            value={locationFilter}
+            onChange={handleLocationFilter}
+            onKeyDown={handleEnterKey}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200"
+          />
+
+          <button
+            onClick={handleSearchClick}
+            disabled={!locationFilter.trim()}
+            className={`px-5 py-2 rounded-lg text-white ${
+              locationFilter.trim()
+                ? "bg-blue-600 hover:bg-blue-700"
+                : "bg-gray-400 cursor-not-allowed"
+            }`}
+          >
+            Search
+          </button>
+        </div>
       </div>
 
-      {/* Default Message */}
+      {/* Empty State */}
       {!searchedCity && (
-        <div className="text-xl text-center text-gray-600">Select City..</div>
+        <div className="flex flex-col items-center justify-center mt-20 text-center">
+
+          <h1 className="text-2xl md:text-3xl font-semibold text-gray-800">
+            Find food near you
+          </h1>
+
+          <p className="text-gray-600 mt-3 max-w-md">
+            Search your city to discover available food donations.
+          </p>
+
+          <div className="bg-white p-8 rounded-2xl shadow-md mt-8 w-full max-w-md">
+            <p className="text-gray-500 text-sm">
+              Start by entering your city above 👆
+            </p>
+          </div>
+
+        </div>
       )}
 
+      {/* Results */}
       {searchedCity && (
-        <>
-          <div className="text-lg text-center font-semibold">
-            Showing results for:{" "}
+        <div className="space-y-6">
+
+          <div className="text-center text-lg font-medium text-gray-700">
+            Showing results for{" "}
             <span className="text-blue-600">{searchedCity}</span>
           </div>
 
-          <FoodTable city={searchedCity} />
-        </>
+          <div className="bg-white p-6 rounded-2xl shadow-md">
+            <FoodTable city={searchedCity} />
+          </div>
+
+        </div>
       )}
     </div>
   );
