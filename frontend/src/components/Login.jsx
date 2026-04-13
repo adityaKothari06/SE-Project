@@ -18,9 +18,10 @@ const Login = () => {
   const [recaptchaVerifier, setRecaptchaVerifier] = useState(null);
   const [confirmationResult, setConfirmationResult] = useState(null);
 
+  const [otpSent, setOtpSent] = useState(false); // 🔥 NEW
+
   const [isPending, startTransition] = useTransition();
 
-  // for timer
   useEffect(() => {
     let timer;
     if (resendCountdown > 0) {
@@ -31,14 +32,11 @@ const Login = () => {
     return () => clearTimeout(timer);
   }, [resendCountdown]);
 
-  // for recaptcha automatically
   useEffect(() => {
     const recaptchaVerifier = new RecaptchaVerifier(
       auth,
       "recaptcha-container",
-      {
-        size: "invisible",
-      },
+      { size: "invisible" }
     );
     setRecaptchaVerifier(recaptchaVerifier);
 
@@ -47,10 +45,7 @@ const Login = () => {
     };
   }, []);
 
-  // this is to request otp
-  const requestOtp = async (e) => {
-    e.preventDefault();
-
+  const requestOtp = async () => {
     startTransition(async () => {
       setError("");
 
@@ -59,12 +54,10 @@ const Login = () => {
       }
 
       try {
-        // formatting the phone number
         const formattedPhone = phoneNumber.startsWith("+91")
           ? phoneNumber
           : `+91${phoneNumber}`;
 
-        // checking if the user exists
         const userRef = doc(db, "users", formattedPhone);
         const userSnap = await getDoc(userRef);
         if (!userSnap.exists()) {
@@ -77,33 +70,26 @@ const Login = () => {
         const confirmationResult = await signInWithPhoneNumber(
           auth,
           formattedPhone,
-          recaptchaVerifier,
+          recaptchaVerifier
         );
 
         setConfirmationResult(confirmationResult);
         setSuccess("OTP sent successfully.");
+        setOtpSent(true); // 🔥 IMPORTANT
       } catch (err) {
         console.log(err);
         setResendCountdown(0);
-
-        if (err.code === "auth/invalid-phone-number") {
-          setError("Invalid phone number. Please check the number.");
-        } else if (err.code === "auth/too-many-requests") {
-          setError("Too many requests. Please try again later.");
-        } else {
-          setError("Failed to send OTP. Please try again.");
-        }
+        setError("Failed to send OTP.");
       }
     });
   };
 
-  // otp verification
   const verifyOtp = async () => {
     startTransition(async () => {
       setError("");
 
       if (!confirmationResult) {
-        setError("Please request OTP first.");
+        setError("Please generate OTP first.");
         return;
       }
 
@@ -111,25 +97,14 @@ const Login = () => {
         const result = await confirmationResult.confirm(otp);
 
         const phone = result.user.phoneNumber;
-
         const userRef = doc(db, "users", phone);
         const userSnap = await getDoc(userRef);
 
-        console.log("Phone:", phone);
-        console.log("Firestore exists:", userSnap.exists());
-        console.log("Data:", userSnap.data());
         let userData = {};
         if (userSnap.exists()) {
           userData = userSnap.data();
         }
 
-        if (!userSnap.exists()) {
-          console.log("user not found in firebase");
-          return;
-        }
-        console.log(userSnap.data());
-
-        // storing combined user data in context
         setCurrentUser({
           ...result.user,
           ...userData,
@@ -137,100 +112,100 @@ const Login = () => {
 
         navigate("/FoodList");
       } catch (error) {
-        console.log(error);
-
-        setError("Failed to verify OTP. Please check the OTP.");
+        setError("Invalid OTP.");
       }
     });
   };
 
-  // for auto verifying the otp
-  useEffect(() => {
-    const hasEnteredAllDigits = otp.trim().length === 6;
-    if (hasEnteredAllDigits) {
-      (async () => {
-        await verifyOtp();
-      })();
-    }
-  }, [otp]);
-
   return (
-    <div className="flex items-center justify-center bg-blue-50 min-h-screen md:pt-14">
-      <div className="max-w-sm w-full bg-white p-6 rounded-lg shadow-md">
-        {!confirmationResult && (
-          <form onSubmit={requestOtp} className="">
-            <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-              Login
-            </h2>
-            {/* Phone No */}
-            <div className="mb-5">
-              <label
-                htmlFor="ph-no"
-                className="block mb-2 text-sm font-medium text-gray-800"
-              >
-                Phone No
-              </label>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300 md:pt-14">
+      <div className="max-w-sm w-full bg-white p-8 rounded-xl shadow-lg min-h-[450px] flex flex-col justify-center">
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+          Login
+        </h2>
+
+        {/* Phone */}
+        <div className="mb-5">
+          <label className="block mb-2 text-sm font-medium text-gray-800">
+            Phone No
+          </label>
+
+          <input
+            type="tel"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            className="bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 w-full px-4 py-3"
+            placeholder="+91 7894561230"
+          />
+        </div>
+
+        {/* OTP BOXES */}
+        <div className="mb-5">
+          <label className="block mb-2 text-sm font-medium text-gray-800">
+            Enter OTP
+          </label>
+
+          <div className="flex justify-between gap-2">
+            {[...Array(6)].map((_, index) => (
               <input
-                type="tel"
-                value={phoneNumber}
+                key={index}
+                type="text"
+                maxLength="1"
+                value={otp[index] || ""}
                 onChange={(e) => {
-                  setPhoneNumber(e.target.value);
-                  setConfirmationResult(null);
+                  const value = e.target.value.replace(/\D/, "");
+                  let newOtp = otp.split("");
+                  newOtp[index] = value;
+                  setOtp(newOtp.join("").slice(0, 6));
+
+                  if (value && e.target.nextSibling) {
+                    e.target.nextSibling.focus();
+                  }
                 }}
-                className="bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full px-3 py-2.5 placeholder-gray-400 shadow-sm"
-                placeholder="+91 7894561230"
-                required
+                onKeyDown={(e) => {
+                  if (
+                    e.key === "Backspace" &&
+                    !otp[index] &&
+                    e.target.previousSibling
+                  ) {
+                    e.target.previousSibling.focus();
+                  }
+                }}
+                className="w-12 h-12 text-center text-lg font-semibold border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
               />
-              <div className="mt-2 text-sm font-medium text-gray-800">
-                <p>Not a user?</p>
-                <Link to={"/Register"} className="underline">
-                  Register
-                </Link>
-              </div>
-            </div>
-          </form>
-        )}
-
-        {confirmationResult && (
-          <div className="mb-5 mt-5">
-            <label
-              htmlFor="otp"
-              className="block mb-2 text-sm font-medium text-gray-800"
-            >
-              Enter OTP
-            </label>
-            <input
-              type="tel"
-              id="otp"
-              value={otp}
-              maxLength="6"
-              pattern="\d{6}"
-              onChange={(e) => setOtp(e.target.value)}
-              className="bg-gray-100 border border-gray-300 text-gray-800 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full px-3 py-2.5 placeholder-gray-400 shadow-sm"
-              placeholder="••••••••"
-              required
-            />
+            ))}
           </div>
-        )}
+        </div>
 
-        {/* Send OTP Button */}
-        <div className="flex justify-center items-center">
+        {/* Signup */}
+        <div className="mb-4 text-sm">
+          Not a user?{" "}
+          <Link to="/SignUp" className="text-blue-600 underline">
+            Sign up
+          </Link>
+        </div>
+
+        {/* BUTTON */}
+        <div className="flex justify-center">
           <button
-            disabled={!phoneNumber || isPending || resendCountdown > 0}
-            className="w-1/2 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-md text-sm px-4 py-2.5 focus:outline-none shadow-sm cursor-pointer"
+            onClick={otpSent ? verifyOtp : requestOtp}
+            disabled={!phoneNumber || isPending}
+            className="w-1/2 text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg px-4 py-2.5 shadow-md disabled:opacity-50"
           >
-            {resendCountdown > 0
-              ? `Resend OTP in ${resendCountdown}`
-              : isPending
-                ? "Sending OTP"
-                : "Send OTP"}
+            {isPending
+              ? "Processing..."
+              : otpSent
+              ? "Verify OTP"
+              : "Generate OTP"}
           </button>
         </div>
 
-        <div>
+        {/* Messages */}
+        <div className="mt-4 text-center">
           {error && <p className="text-red-500">{error}</p>}
           {success && <p className="text-green-500">{success}</p>}
         </div>
+
         <div id="recaptcha-container"></div>
       </div>
     </div>

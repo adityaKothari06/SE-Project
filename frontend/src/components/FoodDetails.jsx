@@ -41,7 +41,6 @@ const FoodDetails = () => {
 
   const food = foodData.find((item) => item.id === id);
 
-  // Countdown logic
   useEffect(() => {
     let timer;
 
@@ -58,15 +57,22 @@ const FoodDetails = () => {
     return () => clearTimeout(timer);
   }, [timeLeft, canUnreserve]);
 
+  // 🔥 ONLY CHANGE HERE
   const handleReserve = () => {
-    if (currentUser) {
-      setIsReserved(true);
-      setCanUnreserve(true);
-      setTimeLeft(10); // 1 minute window
-    }else {
-      navigate("/Login")
+    if (!currentUser) {
+      navigate("/Login");
+      return;
     }
-    
+
+    navigate("/reserve", {
+      state: {
+        foodId: food.id,
+        foodName: food.foodName,
+        donor: food.donor,
+        location: food.location,
+        quantity: food.quantity,
+      },
+    });
   };
 
   const handleUnreserve = () => {
@@ -79,13 +85,13 @@ const FoodDetails = () => {
 
   return (
     <div className="p-6 mt-20 max-w-3xl mx-auto">
-      {/* back button */}
       <button
         onClick={() => navigate("/FoodList", { state: { city } })}
         className="mb-4 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-100 transition"
       >
         ⬅ Back
       </button>
+
       <h1 className="text-3xl font-bold mb-4">{food.foodName}</h1>
 
       <img
@@ -94,58 +100,30 @@ const FoodDetails = () => {
         className="w-full h-fit object-cover rounded-lg mb-4"
       />
 
-      <p>
-        <strong>Donor:</strong> {food.donor}
-      </p>
-      <p>
-        <strong>Location:</strong> {food.location}
-      </p>
+      <p><strong>Donor:</strong> {food.donor}</p>
+      <p><strong>Location:</strong> {food.location}</p>
 
-      {/* Buttons */}
       <div className="mt-6 flex gap-4 items-center">
-        {/* Reserve */}
-        {!isReserved && (
-          <button
-            onClick={handleReserve}
-            className="px-4 py-2 bg-green-600 text-white rounded cursor-pointer"
-          >
-            Reserve Pickup
-          </button>
-        )}
 
-        {/* Unreserve (only for 60 sec) */}
-        {isReserved && canUnreserve && (
-          <button
-            onClick={handleUnreserve}
-            className="px-4 py-2 bg-red-600 text-white rounded cursor-pointer"
-          >
-            Unreserve ({timeLeft}s)
-          </button>
-        )}
-
-        {/* Locked Reserved */}
-        {isReserved && !canUnreserve && (
-          <span className="text-gray-600 font-medium">
-            Reservation Locked ✅
-          </span>
-        )}
-
-        {/* Directions */}
+        {/* 🔥 Reserve → now redirects */}
         <button
-          disabled={!isReserved}
+          onClick={handleReserve}
+          className="px-4 py-2 bg-green-600 text-white rounded cursor-pointer"
+        >
+          Reserve Pickup
+        </button>
+
+        <button
           onClick={() =>
             window.open(
-              `https://www.google.com/maps/search/?api=1&query=${food.location}`,
+              `https://www.google.com/maps/search/?api=1&query=${food.location}`
             )
           }
-          className={`px-4 py-2 rounded text-white ${
-            isReserved
-              ? "bg-blue-600 cursor-pointer"
-              : "bg-gray-400 cursor-not-allowed"
-          }`}
+          className="px-4 py-2 bg-blue-600 text-white rounded cursor-pointer"
         >
           Get Directions
         </button>
+
       </div>
     </div>
   );

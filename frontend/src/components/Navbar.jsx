@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useLocation } from "react-router";
 import { useState } from "react";
 import { useAuth } from "../context/useAuth";
 
@@ -6,6 +6,9 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isHomePage = location.pathname === "/";
 
   const handleLogout = async () => {
     try {
@@ -16,84 +19,111 @@ const Navbar = () => {
     }
   };
 
+  const handleDonateClick = () => {
+    if (currentUser) {
+      navigate("/AddDonation");
+    } else {
+      navigate("/Login", { state: { from: "/AddDonation" } });
+    }
+  };
+
   return (
-    <div>
-      <nav className="bg-blue-100 w-full border-b border-gray-300 fixed top-0 z-10">
-        <div className="max-w-7xl flex flex-wrap items-center justify-between mx-auto py-4 px-4">
-          {/* Logo */}
-          <span className="text-xl font-semibold text-gray-800 whitespace-nowrap">
-            The Zero Waste Pantry
+    <nav className="bg-blue-200/90 backdrop-blur border-b border-blue-300 fixed top-0 w-full z-10 shadow-sm">
+      
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+
+        {/* Logo */}
+        <Link to="/">
+          <span className="text-lg md:text-xl font-semibold text-gray-900 tracking-tight cursor-pointer">
+            Zero Waste Pantry
           </span>
+        </Link>
 
-          {/* Hamburger Button (mobile only) */}
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden text-gray-800 text-2xl"
-          >
-            ☰
-          </button>
+        {/* Hamburger */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="md:hidden text-gray-700 text-2xl"
+        >
+          ☰
+        </button>
 
-          {/* Menu */}
-          <div
-            className={`w-full md:flex md:w-auto md:order-1 ${
-              isOpen ? "block" : "hidden"
-            }`}
-          >
-            <ul
-              className="font-medium flex flex-col p-4 mt-4 border border-gray-200 rounded-lg bg-white 
-              md:flex-row md:space-x-8 md:p-0 md:mt-0 md:border-0 md:bg-blue-100"
-            >
-              {!currentUser && (
+        {/* Menu */}
+        <div
+          className={`w-full md:flex md:w-auto ${
+            isOpen ? "block mt-4" : "hidden"
+          }`}
+        >
+          <ul className="flex flex-col md:flex-row md:items-center gap-4 md:gap-8 bg-white md:bg-transparent p-4 md:p-0 rounded-lg md:rounded-none shadow md:shadow-none">
+
+            {/* 🔥 HOMEPAGE ONLY */}
+            {isHomePage ? (
+              <>
                 <li>
                   <Link
                     to="/Login"
-                    className="block py-2 px-2 bg-blue-600 md:bg-transparent text-blue-700"
+                    className="text-gray-700 hover:text-blue-600 transition text-sm"
                   >
                     Login
                   </Link>
                 </li>
-              )}
 
-              {currentUser && (
-                <>
+                <li>
+                  <button
+                    onClick={handleDonateClick}
+                    className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm hover:bg-blue-700 transition shadow-sm"
+                  >
+                    Donate now
+                  </button>
+                </li>
+              </>
+            ) : (
+              <>
+                {!currentUser && (
                   <li>
-                    <span className="block py-2 px-2 text-gray-800 hover:text-blue-700 cursor-pointer">
-                      <Link to="/Profile">Hi, {currentUser.firstName}</Link>
-                    </span>
-                  </li>
-                  <li>
-                    <button
-                      onClick={handleLogout}
-                      className="block py-2 px-2 text-gray-800 rounded hover:bg-gray-200 md:hover:bg-transparent md:hover:text-blue-700 cursor-pointer"
+                    <Link
+                      to="/Login"
+                      className="text-gray-700 hover:text-blue-600 transition text-sm"
                     >
-                      Logout
-                    </button>
+                      Login
+                    </Link>
                   </li>
-                </>
-              )}
+                )}
 
-              <li>
-                <Link
-                  to="/FoodList"
-                  className="block py-2 px-2 text-gray-800 rounded hover:bg-gray-200 md:hover:bg-transparent md:hover:text-blue-700"
-                >
-                  Available Food
-                </Link>
-              </li>
+                {currentUser && (
+                  <>
+                    <li className="text-gray-700 text-sm">
+                      Hi,{" "}
+                      <span className="font-medium">
+                        {currentUser.firstName}
+                      </span>
+                    </li>
 
-              {/* <li>
-                <Link
-                  to="/Profile"
-                  className="block py-2 px-2 text-gray-800 hover:text-blue-700"
-                >
-                  Profile
-                </Link>
-              </li> */}
-            </ul>
-          </div>
+                    <li>
+                      <button
+                        onClick={handleLogout}
+                        className="text-gray-700 hover:text-red-500 transition text-sm"
+                      >
+                        Logout
+                      </button>
+                    </li>
+                  </>
+                )}
+
+                <li>
+                  <button
+                    onClick={handleDonateClick}
+                    className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm hover:bg-blue-700 transition shadow-sm"
+                  >
+                    Donate now
+                  </button>
+                </li>
+              </>
+            )}
+          </ul>
         </div>
-      </nav>
-    </div>
+
+      </div>
+    </nav>
   );
 };
 

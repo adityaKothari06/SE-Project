@@ -72,12 +72,6 @@ const FoodTable = (props) => {
 
   return (
     <div className="mt-5 px-4 space-y-6">
-        <div className="flex flex-row-reverse">
-          <Link to={'/AddDonation'}>
-          <button className="text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md text-lg cursor-pointer">Add Donation</button>
-          </Link>
-        </div>
-
       <h2 className="text-2xl font-semibold mb-6 text-center">
         Available Food Donations
       </h2>
