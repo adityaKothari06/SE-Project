@@ -19,7 +19,7 @@ import ConfirmationPage from "./Pages/ConfirmationPage";
 const AppContent = () => {
   const location = useLocation();
 
-  // ✅ Fix scroll issue after navigation
+  // Fix scroll issue after navigation
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
@@ -29,8 +29,7 @@ const AppContent = () => {
 
       <Navbar />
 
-      {/* ✅ Correct spacing for fixed navbar */}
-      <main className="flex-grow pt-20">
+      <main className="grow">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/Login" element={<LoginPage />} />
@@ -59,7 +58,7 @@ const AppContent = () => {
           />
 
           <Route
-            path="/reserve"
+            path="/reserve/:id"
             element={
               <PrivateRoute>
                 <ReservationForm />
@@ -68,7 +67,7 @@ const AppContent = () => {
           />
 
           <Route
-            path="/confirm"
+            path="/confirm/:id"
             element={
               <PrivateRoute>
                 <ConfirmationPage />

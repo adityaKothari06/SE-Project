@@ -3,7 +3,8 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models import Event
 from schemas import EventCreate, EventResponse
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
+import pytz
 from typing import List
 
 router = APIRouter(
@@ -15,7 +16,8 @@ router = APIRouter(
 @router.post("/", response_model=EventResponse)
 def create_event(event: EventCreate, donor_uid: str, db: Session = Depends(get_db)):
     
-    pickup_end = datetime.utcnow() + timedelta(minutes=event.duration_minutes)
+    IST = pytz.timezone("Asia/Kolkata")
+    pickup_end = datetime.now(timezone.utc) + timedelta(minutes=event.duration_minutes)
     
     new_event = Event(
         institution_name=event.institution_name,
