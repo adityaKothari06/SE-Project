@@ -31,7 +31,7 @@ const Registration = () => {
 
       // Save to Firestore
       await setDoc(userRef, {
-        phone: formattedPhone,
+        phoneNumber: formattedPhone,
         firstName,
         lastName,
         createdAt: new Date(),

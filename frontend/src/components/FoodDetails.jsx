@@ -1,129 +1,142 @@
-import { useParams, useLocation, useNavigate, Link } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/useAuth";
 
 const FoodDetails = () => {
   const { id } = useParams();
-  const { currentUser } = useAuth();
-  const [isReserved, setIsReserved] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(0);
-  const [canUnreserve, setCanUnreserve] = useState(false);
-
-  const location = useLocation();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
 
-  const city = location.state?.city;
-
-  const foodData = [
-    {
-      id: "1",
-      donor: "Ramesh Kumar",
-      foodName: "Veg Biryani",
-      category: "Cooked Food",
-      quantity: 10,
-      location: "Delhi",
-      image:
-        "https://tse4.mm.bing.net/th/id/OIP.1O4yDXeGOG3jjdOivuw00gHaE8?pid=Api&h=220&P=0",
-      description: "Freshly cooked veg biryani from a wedding event.",
-    },
-    {
-      id: "2",
-      donor: "Anita Sharma",
-      foodName: "Sandwich Packets",
-      category: "Packed Food",
-      quantity: 25,
-      location: "Gurgaon",
-      image: "https://source.unsplash.com/400x300/?sandwich",
-      createdAt: new Date(),
-      expiryTime: new Date(Date.now() + 2 * 60 * 1000),
-    },
-  ];
-
-  const food = foodData.find((item) => item.id === id);
-
+  const [food, setFood] = useState(null);
+  const [loading, setLoading] = useState(true);
+  // Fetch if page refreshed
   useEffect(() => {
-    let timer;
-
-    if (canUnreserve && timeLeft > 0) {
-      timer = setTimeout(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
+    if (!food) {
+      fetch(`http://localhost:8000/events/${id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          const transformed = {
+            id: data.id,
+            poc_name: data.poc_name,
+            mobile: data.poc_mobile,
+            foodName: data.food_type,
+            quantity: data.food_quantity,
+            city: data.city,
+            address: data.address,
+            pickupEnd: data.pickup_end,
+            status: data.status,
+            image: "https://source.unsplash.com/400x300/?food",
+          };
+          console.log(data);
+          setFood(transformed);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error(err);
+          navigate("/FoodList");
+        });
     }
+  }, [id]);
 
-    if (timeLeft === 0) {
-      setCanUnreserve(false);
-    }
+  const [isExpired, setIsExpired] = useState(false);
 
-    return () => clearTimeout(timer);
-  }, [timeLeft, canUnreserve]);
+useEffect(() => {
+  if (!food?.pickupEnd) return;
 
-  // 🔥 ONLY CHANGE HERE
+  const interval = setInterval(() => {
+    setIsExpired(new Date(food.pickupEnd + "Z") < new Date());
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [food?.pickupEnd]);
+
+  // loading instead of redirect
+  if (loading || !food) {
+    return <p className="mt-20 text-center">Loading...</p>;
+  }
+
+  const city = food?.city;
+
+  // Reserve handler
   const handleReserve = () => {
     if (!currentUser) {
       navigate("/Login");
       return;
     }
 
-    navigate("/reserve", {
-      state: {
-        foodId: food.id,
-        foodName: food.foodName,
-        donor: food.donor,
-        location: food.location,
-        quantity: food.quantity,
-      },
-    });
+    navigate(`/reserve/${id}`);
   };
 
-  const handleUnreserve = () => {
-    setIsReserved(false);
-    setCanUnreserve(false);
-    setTimeLeft(0);
-  };
-
-  if (!food) return <p className="mt-20 text-center">Food not found</p>;
 
   return (
-    <div className="p-6 mt-20 max-w-3xl mx-auto">
-      <button
-        onClick={() => navigate("/FoodList", { state: { city } })}
-        className="mb-4 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-100 transition"
-      >
-        ⬅ Back
-      </button>
-
-      <h1 className="text-3xl font-bold mb-4">{food.foodName}</h1>
-
-      <img
-        src={food.image}
-        alt={food.foodName}
-        className="w-full h-fit object-cover rounded-lg mb-4"
-      />
-
-      <p><strong>Donor:</strong> {food.donor}</p>
-      <p><strong>Location:</strong> {food.location}</p>
-
-      <div className="mt-6 flex gap-4 items-center">
-
-        {/* 🔥 Reserve → now redirects */}
+    <div className="flex justify-center">
+      <div className="p-6 mt-30 mb-15 max-w-3xl w-full shadow rounded-2xl">
+        {/* Back */}
         <button
-          onClick={handleReserve}
-          className="px-4 py-2 bg-green-600 text-white rounded cursor-pointer"
+          onClick={() => navigate("/FoodList", { state: { city } })}
+          className="mb-4 px-4 py-2 rounded-2xl hover:bg-gray-50"
         >
-          Reserve Pickup
+          ⬅ Back
         </button>
 
-        <button
-          onClick={() =>
-            window.open(
-              `https://www.google.com/maps/search/?api=1&query=${food.location}`
-            )
-          }
-          className="px-4 py-2 bg-blue-600 text-white rounded cursor-pointer"
-        >
-          Get Directions
-        </button>
+        <div className="p-5">
+          {/* Image */}
+          <img
+            src={food.image}
+            alt={food.foodName}
+            className="w-full rounded-lg mb-4"
+          />
 
+          {/* Title */}
+          <h1 className="text-3xl font-bold mb-4">{food.foodName}</h1>
+
+          {/* Info */}
+          <p>
+            <strong>Person of Contact Name:</strong> {food.poc_name}
+          </p>
+          <p>
+            <strong>Contact:</strong> {"+91" + food.mobile}
+          </p>
+          <p>
+            <strong>Quantity:</strong> {food.quantity}
+          </p>
+          <p>
+            <strong>City:</strong> {food.city}
+          </p>
+          <p>
+            <strong>Address:</strong> {food.address}
+          </p>
+          <p>
+            <strong>Pickup Deadline:</strong>{" "}
+            {new Date(food.pickupEnd + "Z").toLocaleString("en-IN", {
+              timeZone: "Asia/Kolkata",
+            })}
+          </p>
+
+          {/* Buttons */}
+          <div className="mt-6 flex gap-4">
+            <button
+              onClick={handleReserve}
+              disabled={isExpired}
+              className={`px-4 py-2 rounded ${
+                isExpired ? "bg-gray-400" : "bg-green-600 text-white"
+              }`}
+            >
+              {isExpired ? "Expired" : "Reserve Pickup"}
+            </button>
+
+            <button
+              onClick={() =>
+                window.open(
+                  `https://www.google.com/maps/search/?api=1&query=${food.address}`,
+                )
+              }
+              className="px-4 py-2 bg-blue-600 text-white rounded"
+            >
+              Get Directions
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

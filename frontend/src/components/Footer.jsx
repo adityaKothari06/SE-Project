@@ -1,6 +1,8 @@
+import { Link } from "react-router";
+
 const Footer = () => {
   return (
-    <footer className="bg-blue-100 text-gray-800 mt-16 px-6 py-12 border-t border-blue-200">
+    <footer className="bg-blue-100 text-gray-800 px-6 py-12 border-t border-blue-200">
       
       <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-8 text-sm">
 
@@ -17,8 +19,8 @@ const Footer = () => {
         <div className="space-y-3">
           <h2 className="text-base font-semibold text-gray-900">Quick Links</h2>
           <ul className="space-y-2 text-gray-600">
-            <li className="hover:text-blue-600 transition cursor-pointer">Browse Food</li>
-            <li className="hover:text-blue-600 transition cursor-pointer">Donate</li>
+            <li className="hover:text-blue-600 transition cursor-pointer"><Link to='/FoodList'>Browser Food</Link></li>
+            <li className="hover:text-blue-600 transition cursor-pointer"><Link to="/AddDonation">Donate</Link></li>
             <li className="hover:text-blue-600 transition cursor-pointer">How it Works</li>
           </ul>
         </div>

@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import LocationInput from "./LocationInput";
+import { useAuth } from "../context/useAuth";
 
 const EventForm = () => {
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [locationData, setLocationData] = useState(null);
 
@@ -13,12 +15,12 @@ const EventForm = () => {
     pocMobile: "",
     approxFood: "",
     foodType: "Veg",
-    durationMinutes: "", // how long to keep listing
+    durationMinutes: "",
   });
 
   const [submitted, setSubmitted] = useState(false);
 
-  // Handle input change
+  //  Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -27,13 +29,16 @@ const EventForm = () => {
     }));
   };
 
-  // Handle submit
-  const handleSubmit = (e) => {
+  // Submit to backend
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Basic validation
+    if(!currentUser) {
+      alert("Login first")
+      return;
+    }
+
     if (
-      !formData.institutionName ||
       !formData.address ||
       !formData.pocName ||
       !formData.pocMobile ||
@@ -43,43 +48,50 @@ const EventForm = () => {
       return;
     }
 
-    const now = new Date();
-    const expiryTime = new Date(
-      now.getTime() + formData.durationMinutes * 60 * 1000,
-    );
+    try {
+      const res = await fetch(
+        `http://localhost:8000/events/?donor_uid=${currentUser.uid}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            institution_name: formData.institutionName,
+            address: formData.address,
+            city: locationData?.city,
+            poc_name: formData.pocName,
+            poc_mobile: formData.pocMobile,
+            food_type: formData.foodType,
+            food_quantity: Number(formData.approxFood),
+            duration_minutes: Number(formData.durationMinutes),
+          }),
+        }
+      );
 
-    const submissionData = {
-      ...formData,
-      location: locationData?.address,
-      lat: locationData?.lat,
-      lng: locationData?.lng,
-      submittedAt: now,
-      expiryTime,
-    };
+      if (!res.ok) {
+        console.log("error: ", res)
+        throw new Error("Failed to create event");
+      }
 
-    console.log("Submission Data:", submissionData);
+      const data = await res.json();
+      console.log("Created Event:", data);
 
-    // 🔥 FUTURE API CALL
-    /*
-    fetch("/api/donations", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(submissionData),
-    })
-    */
+      setSubmitted(true);
 
-    setSubmitted(true);
+      // Redirecting to list page
+      setTimeout(() => {
+        navigate("/FoodList", { state: { city: data.city } });
+      }, 1000);
 
-    // Redirect to FoodListing after 1 second
-    setTimeout(() => {
-      navigate("/FoodList", { state: { city: "" } });
-    }, 1000);
+    } catch (err) {
+      console.error("Error creating event:", err);
+      alert("Error creating event");
+    }
   };
 
   return (
-    <div className="max-w-3xl mx-auto mt-20 p-6 bg-white shadow rounded-lg">
+    <div className="max-w-3xl mx-auto mt-25 p-8 bg-white shadow-xl rounded-2xl mb-20">
       <h2 className="text-2xl font-semibold mb-6 text-center">
         Add Food Donation Event
       </h2>
@@ -95,19 +107,10 @@ const EventForm = () => {
           disabled={submitted}
         />
 
-        {/* <textarea
-          name="address"
-          placeholder="Address"
-          value={formData.address}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          disabled={submitted}
-        /> */}
-
+        {/* Location Input */}
         <LocationInput
           onLocationSelect={(data) => {
             setLocationData(data);
-
             setFormData((prev) => ({
               ...prev,
               address: data.address,
@@ -183,7 +186,6 @@ const EventForm = () => {
       {submitted && (
         <p className="text-green-600 text-center mt-4">
           ✅ Donation added successfully! Redirecting...
-          {console.log(formData)}
         </p>
       )}
     </div>

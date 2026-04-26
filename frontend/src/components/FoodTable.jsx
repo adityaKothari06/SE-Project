@@ -1,60 +1,33 @@
-import { Link } from "react-router";
 import FoodCard from "./FoodCard";
 import { useState, useEffect } from "react";
 
-const FoodTable = (props) => {
+const FoodTable = ({ city }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [foodData, setFoodData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const foodData = [
-    {
-      id: "1",
-      donor: "Ramesh Kumar",
-      foodName: "Veg Biryani",
-      category: "Cooked Food",
-      quantity: 10,
-      location: "Delhi",
-      image:
-        "https://tse4.mm.bing.net/th/id/OIP.1O4yDXeGOG3jjdOivuw00gHaE8?pid=Api&h=220&P=0",
-      createdAt: new Date(),
-      expiryTime: new Date(Date.now() + 5 * 60 * 1000), // 5 min
-    },
-    {
-      id: "2",
-      donor: "Anita Sharma",
-      foodName: "Sandwich Packets",
-      category: "Packed Food",
-      quantity: 25,
-      location: "Gurgaon",
-      image: "https://source.unsplash.com/400x300/?sandwich",
-      createdAt: new Date(),
-      expiryTime: new Date(Date.now() + 2 * 60 * 1000),
-    },
-    {
-      id: "3",
-      donor: "Ramesh Kumar",
-      foodName: "Veg Biryani",
-      category: "Cooked Food",
-      quantity: 10,
-      location: "Delhi",
-      image:
-        "https://tse4.mm.bing.net/th/id/OIP.1O4yDXeGOG3jjdOivuw00gHaE8?pid=Api&h=220&P=0",
-      createdAt: new Date(),
-      expiryTime: new Date(Date.now() + 5 * 60 * 1000), // 5 min
-    },
-    {
-      id: "4",
-      donor: "Ramesh Kumar",
-      foodName: "Veg Biryani",
-      category: "Cooked Food",
-      quantity: 10,
-      location: "Delhi",
-      image:
-        "https://tse4.mm.bing.net/th/id/OIP.1O4yDXeGOG3jjdOivuw00gHaE8?pid=Api&h=220&P=0",
-      createdAt: new Date(),
-      expiryTime: new Date(Date.now() + 5 * 60 * 1000), // 5 min
-    },
-  ];
+  // 🔄 Fetch events from backend
+  const fetchEvents = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:8000/events?city=${city || ""}`
+      );
+      const data = await res.json();
 
+      console.log("Fetched events:", data);
+      setFoodData(data);
+    } catch (err) {
+      console.error("Error fetching events:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, [city]);
+
+  // ⏱ Timer for expiry
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -63,12 +36,30 @@ const FoodTable = (props) => {
     return () => clearInterval(timer);
   }, []);
 
+  // 🔁 Transform backend → UI format
+  const transformedFood = foodData.map((event) => ({
+    id: event.id,
+    donor: event.poc_name,
+    foodName: event.food_type,
+    category: "Donation",
+    quantity: event.food_quantity,
+    location: event.city,
+    image: "https://source.unsplash.com/400x300/?food",
+    createdAt: event.created_at,
+    expiryTime: event.pickup_end,
+  }));
+
   // 🔍 Filter + remove expired
-  const filteredFood = foodData
-    .filter((food) =>
-      food.location.toLowerCase().includes((props.city).toLowerCase()),
-    )
-    .filter((food) => new Date(food.expiryTime) > currentTime);
+  const filteredFood = transformedFood
+  .filter((food) => {
+  const expiry = new Date(food.expiryTime + "Z"); // force UTC
+  return expiry > currentTime;
+})
+  
+
+  if (loading) {
+    return <p className="text-center mt-5">Loading...</p>;
+  }
 
   return (
     <div className="mt-5 px-4 space-y-6">
@@ -76,11 +67,15 @@ const FoodTable = (props) => {
         Available Food Donations
       </h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 gap-10">
+      <div className="grid grid-cols-1 gap-10">
         {filteredFood.length > 0 ? (
-          filteredFood.map((food) => <FoodCard key={food.id} {...food} />)
+          filteredFood.map((food) => (
+            <FoodCard key={food.id} {...food} />
+          ))
         ) : (
-          <p className="text-center text-gray-500">No available food</p>
+          <p className="text-center text-gray-500">
+            No available food
+          </p>
         )}
       </div>
     </div>

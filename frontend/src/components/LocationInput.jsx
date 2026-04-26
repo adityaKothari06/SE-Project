@@ -21,14 +21,23 @@ const LocationInput = ({ onLocationSelect }) => {
         try {
           // 🔥 Reverse geocoding (OpenStreetMap)
           const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
           );
           const data = await res.json();
 
           const address = data.display_name;
 
+          const city =
+            data.address?.city ||
+            data.address?.town ||
+            data.address?.village ||
+            data.address?.state_district ||
+            data.address?.state ||
+            "";
+
           const payload = {
             address,
+            city,
             lat: latitude,
             lng: longitude,
           };
@@ -41,7 +50,6 @@ const LocationInput = ({ onLocationSelect }) => {
           if (onLocationSelect) {
             onLocationSelect(payload);
           }
-
         } catch (err) {
           console.error(err);
           alert("Failed to fetch address");
@@ -53,7 +61,7 @@ const LocationInput = ({ onLocationSelect }) => {
         console.error(error);
         alert("Location permission denied or unavailable");
         setLoading(false);
-      }
+      },
     );
   };
 
@@ -63,8 +71,14 @@ const LocationInput = ({ onLocationSelect }) => {
 
     setLocation(value);
 
+    const getCityFromAddress = (address) => {
+      const parts = address.split(",");
+      return parts[parts.length - 3]?.trim() || "";
+    };
+
     const payload = {
       address: value,
+      city: getCityFromAddress(value), // ✅ ADD THIS
       lat: null,
       lng: null,
     };

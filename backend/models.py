@@ -1,12 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, Enum, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base
-import datetime
-
-from sqlalchemy import Column, Integer, String, Float, DateTime, Enum, ForeignKey
-from sqlalchemy.orm import relationship
-from database import Base
-import datetime
+from datetime import datetime, timezone
 
 class Event(Base):
     __tablename__ = "events"
@@ -22,7 +17,7 @@ class Event(Base):
     duration_minutes = Column(Integer, nullable=False)
     pickup_end = Column(DateTime, nullable=False)
     status = Column(Enum("active", "reserved", "expired"), default="active")
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime,default=lambda: datetime.now(timezone.utc))
     donor_firebase_uid = Column(String(255), nullable=False)
 
     reservations = relationship("Reservation", back_populates="event")
@@ -35,7 +30,7 @@ class Reservation(Base):
     event_id = Column(Integer, ForeignKey("events.id"), nullable=False)
     recipient_firebase_uid = Column(String(255), nullable=False)
     quantity_requested = Column(Integer, nullable=False)
-    reserved_at = Column(DateTime, default=datetime.datetime.utcnow)
+    reserved_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     is_collected = Column(Integer, default=0)  # 0 = not collected, 1 = collected
 
     event = relationship("Event", back_populates="reservations")

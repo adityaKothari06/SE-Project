@@ -37,7 +37,7 @@ const FoodListing = () => {
   }, [location.state]);
 
   return (
-    <div className="px-6 py-10 max-w-6xl mx-auto space-y-10">
+    <div className="px-6 py-10 max-w-6xl mx-auto space-y-10 mt-14">
 
       {/* Search */}
       <div className="flex justify-center">
