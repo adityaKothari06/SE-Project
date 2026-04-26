@@ -46,7 +46,7 @@ const AppContent = () => {
           />
 
           <Route path="/food/:id" element={<FoodDetails />} />
-          <Route path="/AddDonation" element={<EventForm />} />
+          <Route path="/AddDonation" element={<PrivateRoute><EventForm /></PrivateRoute>} />
 
           <Route
             path="/Profile"
