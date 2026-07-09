@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import LocationInput from "./LocationInput";
 import { useAuth } from "../context/useAuth";
+import API_URL from "../config/api";
 
 const EventForm = () => {
   const { currentUser } = useAuth();
@@ -50,7 +51,7 @@ const EventForm = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:8000/events/?donor_uid=${currentUser.uid}`,
+        `${API_URL}/events/?donor_uid=${currentUser.uid}`,
         {
           method: "POST",
           headers: {
