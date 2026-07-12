@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/useAuth";
+import API_URL from "../config/api";
 
 const FoodDetails = () => {
   const { id } = useParams();
@@ -12,7 +13,7 @@ const FoodDetails = () => {
   // Fetch if page refreshed
   useEffect(() => {
     if (!food) {
-      fetch(`http://localhost:8000/events/${id}`)
+      fetch(`${API_URL}/events/${id}`)
         .then((res) => res.json())
         .then((data) => {
           const transformed = {

@@ -20,7 +20,7 @@ const Registration = () => {
         ? phone
         : `+91${phone}`;
 
-      // 🔍 Check if already exists
+      // Check if already exists
       const userRef = doc(db, "users", formattedPhone);
       const userSnap = await getDoc(userRef);
 
@@ -37,7 +37,7 @@ const Registration = () => {
         createdAt: new Date(),
       });
 
-      alert("Registered successfully ✅");
+      alert("Registered successfully ");
 
       // Redirect to login
       navigate("/login");

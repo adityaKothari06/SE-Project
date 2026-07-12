@@ -31,7 +31,7 @@ const Login = () => {
     return () => clearTimeout(timer);
   }, [resendCountdown]);
 
-  // 🔐 recaptcha setup
+  //  recaptcha setup
   useEffect(() => {
     const verifier = new RecaptchaVerifier(
       auth,
@@ -46,7 +46,7 @@ const Login = () => {
     };
   }, []);
 
-  // 📲 SEND OTP
+  //  SEND OTP
   const requestOtp = async () => {
     startTransition(async () => {
       setError("");
@@ -90,7 +90,7 @@ const Login = () => {
     });
   };
 
-  // 🔐 VERIFY OTP
+  //  VERIFY OTP
   const verifyOtp = async () => {
     startTransition(async () => {
       setError("");

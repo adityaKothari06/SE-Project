@@ -1,5 +1,6 @@
 import FoodCard from "./FoodCard";
 import { useState, useEffect } from "react";
+import API_URL from "../config/api";
 
 const FoodTable = ({ city }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -10,7 +11,7 @@ const FoodTable = ({ city }) => {
   const fetchEvents = async () => {
     try {
       const res = await fetch(
-        `http://localhost:8000/events?city=${city || ""}`
+        `${API_URL}/events?city=${city || ""}`
       );
       const data = await res.json();
 

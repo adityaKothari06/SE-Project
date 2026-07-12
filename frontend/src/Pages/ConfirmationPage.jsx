@@ -1,5 +1,6 @@
 import { useNavigate, useParams, useLocation } from "react-router";
 import { useState, useEffect } from "react";
+import API_URL from '../config/api'
 
 const ConfirmationPage = () => {
   const navigate = useNavigate();
@@ -10,12 +11,9 @@ const ConfirmationPage = () => {
   const [foodData, setFoodData] = useState(location.state || null);
   const [error, setError] = useState(null);
 
-  console.log("ID:", id);
-  console.log("State:", foodData);
-
   useEffect(() => {
     if (!foodData) {
-      fetch(`http://localhost:8000/events/${id}`)
+      fetch(`${API_URL}/events/${id}`)
         .then((res) => res.json())
         .then((data) => {
           const transformed = {
@@ -40,7 +38,7 @@ const ConfirmationPage = () => {
   const handleConfirm = async () => {
     try {
     const res = await fetch(
-      `http://localhost:8000/reservations/${id}/collect?recipient_uid=${foodData?.userId}`,
+      `${API_URL}/reservations/${id}/collect?recipient_uid=${foodData?.userId}`,
       { method: "POST" }
     );
 
@@ -58,7 +56,7 @@ const ConfirmationPage = () => {
   const handleCancel = async () => {
     try {
     const res = await fetch(
-      `http://localhost:8000/reservations/${id}/unreserve?recipient_uid=${foodData?.userId}`,
+      `${API_URL}/reservations/${id}/unreserve?recipient_uid=${foodData?.userId}`,
       { method: "POST" }
     );
 

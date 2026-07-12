@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/useAuth";
 import { useNavigate, useParams } from "react-router";
+import API_URL from "../config/api";
 
 const ReservationForm = () => {
   const { currentUser } = useAuth();
@@ -18,7 +19,7 @@ const ReservationForm = () => {
 
 
   useEffect(() => {
-    fetch(`http://localhost:8000/events/${id}`)
+    fetch(`${API_URL}/events/${id}`)
     .then((res) => res.json())
     .then((data) => {
       const transformed = {
@@ -59,7 +60,7 @@ const ReservationForm = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:8000/reservations/${foodData.id}?recipient_uid=${currentUser.uid}`,
+        `${API_URL}/reservations/${foodData.id}?recipient_uid=${currentUser.uid}`,
         {
           method: "POST",
           headers: {
