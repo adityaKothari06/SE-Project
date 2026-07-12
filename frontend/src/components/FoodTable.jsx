@@ -11,7 +11,7 @@ const FoodTable = ({ city }) => {
   const fetchEvents = async () => {
     try {
       const res = await fetch(
-        `${API_URL}/events?city=${city || ""}`
+        `${API_URL}/events/?city=${city || ""}`
       );
       const data = await res.json();
 
