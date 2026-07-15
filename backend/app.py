@@ -1,3 +1,4 @@
+from config import settings
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base
@@ -6,12 +7,14 @@ from routers import events, reservations
 # tables in mysql
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Zero Waste Pantry API")
-
+app = FastAPI(
+    title=settings.API_TITLE,
+    version=settings.API_VERSION
+)
 # backend -> frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

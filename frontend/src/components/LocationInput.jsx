@@ -42,11 +42,11 @@ const LocationInput = ({ onLocationSelect }) => {
             lng: longitude,
           };
 
-          // ✅ Update local state
+          // Update local state
           setLocation(address);
           setCoords({ lat: latitude, lng: longitude });
 
-          // ✅ Send to parent
+          // Send to parent
           if (onLocationSelect) {
             onLocationSelect(payload);
           }
@@ -65,7 +65,7 @@ const LocationInput = ({ onLocationSelect }) => {
     );
   };
 
-  // ✍️ Manual input handler
+  // Manual input handler
   const handleManualChange = (e) => {
     const value = e.target.value;
 
@@ -78,7 +78,7 @@ const LocationInput = ({ onLocationSelect }) => {
 
     const payload = {
       address: value,
-      city: getCityFromAddress(value), // ✅ ADD THIS
+      city: getCityFromAddress(value),
       lat: null,
       lng: null,
     };
@@ -113,7 +113,7 @@ const LocationInput = ({ onLocationSelect }) => {
         {loading ? "Fetching location..." : "Use Current Location 📍"}
       </button>
 
-      {/* Coordinates (optional display) */}
+      {/* Coordinates */}
       {coords.lat && coords.lng && (
         <p className="text-xs text-gray-500">
           Lat: {coords.lat}, Lng: {coords.lng}
