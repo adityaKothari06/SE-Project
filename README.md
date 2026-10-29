@@ -3,7 +3,9 @@
 **Zero Waste Pantry (ZWP)** is a web-based coordination platform designed to redistribute large-scale food surplus to NGOs and individual volunteers. By acting as a communication bridge between institutional donors and food collectors, ZWP aims to significantly reduce food wastage.
 
 ### 🎯 SDG Alignment
+
 This project directly contributes to the United Nations Sustainable Development Goals:
+
 * **SDG 2 (Zero Hunger):** Facilitates the redistribution of surplus food to those in need, improving food security.
 * **SDG 12 (Responsible Consumption and Production):** Intervenes before edible surplus becomes waste, promoting sustainable resource management.
 
@@ -23,15 +25,17 @@ This project directly contributes to the United Nations Sustainable Development 
 ## 🏗️ System Architecture
 
 The platform operates as a standalone web application using a standard three-tier architecture:
+
 * **Frontend (User Interface):** Responsive web interface accessible via mobile and desktop browsers.
 * **Backend (Business Logic Layer):** Handles REST-based request-response communication and core application logic (e.g., expiry triggers, validation).
-* **Database (Data Storage Layer):** Stores critical entities including Event IDs, User Details, Timestamps, and Collection Percentages. 
+* **Database (Data Storage Layer):** Stores critical entities including Event IDs, User Details, Timestamps, and Collection Percentages.
 
 ---
 
 ## 🚀 Future Scope
 
 The architecture is designed to scale to multiple cities with planned future enhancements including:
+
 * GPS-based event filtering
 * AI-based demand forecasting
 * Automated SMS notifications
@@ -43,28 +47,32 @@ The architecture is designed to scale to multiple cities with planned future enh
 
 *Developed as part of the Software Engineering coursework at Punjab Engineering College.*
 
-* **Hitesh Kumar** 
+* **Hitesh Kumar**
 * **Aditya Kothari**
 * **Harshpreet Singh**
 
 ## 🛠️ Local Setup & Installation
 
 ### Prerequisites
+
 * Python 3.12+
 * Node.js 18+
 * Docker & Docker Compose (recommended, handles MySQL for you)
 
 ### Quick Start (Docker Compose)
+
 ```bash
 git clone https://github.com/adityakothari06/SE-Project.git
 cd SE-Project
 docker compose up --build
 ```
+
 This spins up the backend (FastAPI), frontend (React/Vite), and a MySQL instance together, matching production behavior locally.
 
 ### Manual Setup (without Docker)
 
 **Backend**
+
 ```bash
 cd backend
 python -m venv venv
@@ -75,6 +83,7 @@ uvicorn app:app --reload
 ```
 
 **Frontend**
+
 ```bash
 cd frontend
 npm install
@@ -99,4 +108,5 @@ This split lets each layer scale and redeploy independently — a `git push` to 
 *Project submitted to: Dr. Rakesh Bhatia*
 
 ---
+
 *Note: This system does not guarantee food safety or provide delivery services; responsibility for food quality lies with the institutional donor.*
